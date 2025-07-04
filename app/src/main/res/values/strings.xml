@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">PocketStatement</string>
+    <string name="add_receipt_button">Adicionar novo recibo</string>
+    <string name="camera_permission_rationale">Para escanear recibos, o app precisa de acesso à câmera. Por favor, conceda a permissão para continuar.</string>
+    <string name="camera_permission_required">O acesso à câmera é essencial para a funcionalidade principal deste aplicativo.</string>
+    <string name="grant_permission_button">Conceder Permissão</string>
+    <string name="analyze_receipt_button">Analisar Recibo</string>
+    <string name="no_receipts_found">Nenhum recibo encontrado</string>
+
+</resources>
