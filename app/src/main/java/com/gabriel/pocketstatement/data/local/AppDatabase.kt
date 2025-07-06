@@ -8,9 +8,10 @@ import androidx.room.TypeConverters
 
 @Database(
     entities = [ReceiptEntity::class],
-    version = 1,
-    exportSchema = false // For this project, we don't need to export the schema history.
+    version = 2, // AUMENTE A VERSÃO DE 1 PARA 2
+    exportSchema = false
 )
+// --- FIM DA CORREÇÃO ---
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
 
@@ -26,7 +27,13 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "pocket_statement_db"
-                ).build()
+                )
+                    // INÍCIO DA SEGUNDA PARTE DA CORREÇÃO
+                    // Em um app de produção, você criaria uma 'Migration'.
+                    // Para desenvolvimento, podemos simplesmente destruir e recriar o banco.
+                    .fallbackToDestructiveMigration()
+                    // FIM DA SEGUNDA PARTE
+                    .build()
                 INSTANCE = instance
                 instance
             }

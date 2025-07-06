@@ -3,6 +3,7 @@ package com.gabriel.pocketstatement.ui.screen.camera
 import android.Manifest
 import android.content.Context
 import android.graphics.Bitmap
+import android.net.Uri
 import android.util.Log
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
@@ -19,6 +20,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,20 +30,24 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.gabriel.pocketstatement.R
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.shouldShowRationale
-
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun CameraScreen(
-    onNavigateBack: () -> Unit,
-    onPhotoCaptured: (Bitmap) -> Unit
+    onNavigateBack: () -> Unit, // Adicionamos onNavigateBack
+    onPhotoCaptured: (Uri) -> Unit // Mantemos onPhotoCaptured com Uri
 ) {
     val cameraPermissionState = rememberPermissionState(permission = Manifest.permission.CAMERA)
 
@@ -53,7 +59,6 @@ fun CameraScreen(
                     onPhotoCaptured = onPhotoCaptured
                 )
             }
-
             is PermissionStatus.Denied -> {
                 PermissionDeniedContent(
                     shouldShowRationale = cameraPermissionState.status.shouldShowRationale,
@@ -65,11 +70,10 @@ fun CameraScreen(
     }
 }
 
-
 @Composable
 fun CameraView(
     modifier: Modifier = Modifier,
-    onPhotoCaptured: (Bitmap) -> Unit
+    onPhotoCaptured: (Uri) -> Unit
 ) {
     val context: Context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -78,59 +82,51 @@ fun CameraView(
     Box(modifier = modifier.fillMaxSize()) {
         AndroidView(
             factory = { ctx ->
-                PreviewView(ctx).apply {
-                    // Link the PreviewView to the LifecycleCameraController
-                    controller = cameraController
-                    // You might need to set scaleType depending on your needs
-                    // scaleType = PreviewView.ScaleType.FILL_CENTER
-                }
+                PreviewView(ctx).apply { this.controller = cameraController }
             },
-            modifier = Modifier.fillMaxSize(),
-            // Optional: If you need to update the controller or other properties
-            update = { previewView ->
-                // Ensure the controller is bound to the lifecycle owner
-                cameraController.bindToLifecycle(lifecycleOwner)
-                previewView.controller = cameraController // Re-assign in case of recomposition
-            }
+            modifier = Modifier.fillMaxSize()
         )
+        // Garante que o controlador está ligado ao ciclo de vida
+        LaunchedEffect(Unit) {
+            cameraController.bindToLifecycle(lifecycleOwner)
+        }
 
         IconButton(
             onClick = {
-                val executor = ContextCompat.getMainExecutor(context)
+                val outputFile = createTempImageFile(context)
+                val outputOptions = ImageCapture.OutputFileOptions.Builder(outputFile).build()
+
                 cameraController.takePicture(
-                    executor,
-                    object : ImageCapture.OnImageCapturedCallback() {
-                        override fun onCaptureSuccess(image: ImageProxy) {
-                            val capturedBitmap = image.toBitmap()
-                            image.close()
-                            onPhotoCaptured(capturedBitmap)
+                    outputOptions,
+                    ContextCompat.getMainExecutor(context),
+                    object : ImageCapture.OnImageSavedCallback {
+                        override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
+                            val savedUri = outputFileResults.savedUri ?: Uri.fromFile(outputFile)
+                            onPhotoCaptured(savedUri)
                         }
 
                         override fun onError(exception: ImageCaptureException) {
-                            Log.e(
-                                "CameraView",
-                                "Error capturing image: ${exception.message}",
-                                exception
-                            )
+                            Log.e("CameraView", "Error capturing image: ${exception.message}", exception)
                         }
                     }
                 )
             },
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(16.dp)
+            modifier = Modifier.align(Alignment.BottomCenter).padding(16.dp)
         ) {
-            Icon(
-                imageVector = Icons.Default.PhotoCamera,
-                contentDescription = "Take picture",
-                modifier = Modifier.size(48.dp)
-            )
+            Icon(imageVector = Icons.Default.PhotoCamera, contentDescription = "Take picture", modifier = Modifier.size(48.dp))
         }
     }
 }
 
+// Função auxiliar para criar um arquivo temporário para a imagem
+private fun createTempImageFile(context: Context): File {
+    val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+    val storageDir: File? = context.externalCacheDir
+    return File.createTempFile("JPEG_${timeStamp}_", ".jpg", storageDir)
+}
+
 @Composable
-fun PermissionDeniedContent(
+private fun PermissionDeniedContent(
     shouldShowRationale: Boolean,
     onRequestPermission: () -> Unit,
     modifier: Modifier = Modifier

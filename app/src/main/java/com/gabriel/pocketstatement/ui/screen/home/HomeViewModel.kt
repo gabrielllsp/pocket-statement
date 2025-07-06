@@ -9,7 +9,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import javax.inject.Inject
+
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
@@ -32,9 +34,15 @@ class HomeViewModel @Inject constructor(
             }
             .launchIn(viewModelScope) // launchIn is a concise way to collect a flow in a scope
     }
+
+    fun onDeleteReceipt(receipt: Receipt) {
+        viewModelScope.launch {
+            receiptUseCases.deleteReceiptUseCase(receipt)
+        }
+    }
 }
 
-// Represents the state of the home screen
+
 data class HomeState(
     val receipts: List<Receipt> = emptyList(),
     val isLoading: Boolean = false

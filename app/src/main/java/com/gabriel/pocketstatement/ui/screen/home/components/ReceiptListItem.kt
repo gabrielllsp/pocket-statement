@@ -63,17 +63,22 @@ fun ReceiptListItem(
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.primary
                 )
+
+                // --- INÍCIO DA CORREÇÃO ---
+                // Verifica se transactionDate não é nula antes de tentar formatá-la.
+                // Se for nula, usa a creationDate como fallback.
+                val dateToDisplay = receipt.transactionDate ?: receipt.creationDate
                 Text(
-                    text = receipt.transactionDate.format(DateTimeFormatter.ofPattern("dd/MM/yy")),
+                    text = dateToDisplay.format(DateTimeFormatter.ofPattern("dd/MM/yy")),
                     style = MaterialTheme.typography.bodySmall
                 )
+                // --- FIM DA CORREÇÃO ---
             }
         }
     }
 }
 
-// The @Preview annotation lets us see the component in Android Studio's design view
-// without running the app.
+
 @RequiresApi(Build.VERSION_CODES.O)
 @Preview(showBackground = true)
 @Composable
@@ -82,7 +87,7 @@ fun ReceiptListItemPreview() {
         ReceiptListItem(
             receipt = Receipt(
                 id = 1,
-                storeName = "Pão de Açúcar",
+                storeName = "Pão de Açúcar Supermercado Extra Longo",
                 totalAmount = 157.89,
                 transactionDate = LocalDate.now(),
                 items = emptyList(),

@@ -4,6 +4,7 @@ import com.gabriel.pocketstatement.data.local.ReceiptDao
 import com.gabriel.pocketstatement.data.mapper.toDomain
 import com.gabriel.pocketstatement.data.mapper.toEntity
 import com.gabriel.pocketstatement.domain.model.Receipt
+import com.gabriel.pocketstatement.domain.model.SpendingByCategory
 import com.gabriel.pocketstatement.domain.repository.ReceiptRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -36,5 +37,9 @@ class ReceiptRepositoryImpl(
 
     override suspend fun deleteReceipt(receipt: Receipt) {
         dao.deleteReceipt(receipt.toEntity())
+    }
+
+    override fun getSpendingByCategory(): Flow<List<SpendingByCategory>> {
+        return dao.getSpendingByCategory()
     }
 }

@@ -11,8 +11,9 @@ data class ReceiptEntity(
     val id: Long = 0,
     val storeName: String,
     val totalAmount: Double,
-    val transactionDate: LocalDate,
-    val items: List<ReceiptItem>, // Room will use the TypeConverter for this
+    val transactionDate: LocalDate?, // Tornando a data da transação opcional
+    val creationDate: LocalDate,
+    val items: List<ReceiptItem>,
     val category: String,
     val imageUrl: String? = null
 )

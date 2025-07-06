@@ -1,6 +1,7 @@
 package com.gabriel.pocketstatement.domain.repository
 
 import com.gabriel.pocketstatement.domain.model.Receipt
+import com.gabriel.pocketstatement.domain.model.SpendingByCategory
 import kotlinx.coroutines.flow.Flow
 
 interface ReceiptRepository {
@@ -26,4 +27,6 @@ interface ReceiptRepository {
      * Deletes a receipt.
      */
     suspend fun deleteReceipt(receipt: Receipt)
+
+    fun getSpendingByCategory(): Flow<List<SpendingByCategory>>
 }
