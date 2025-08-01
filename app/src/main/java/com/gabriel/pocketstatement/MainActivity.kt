@@ -11,7 +11,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import com.gabriel.pocketstatement.ui.navigation.Navigation
-import com.gabriel.pocketstatement.ui.screen.home.HomeScreen
 import com.gabriel.pocketstatement.ui.theme.PocketStatementTheme
 import dagger.hilt.android.AndroidEntryPoint
 

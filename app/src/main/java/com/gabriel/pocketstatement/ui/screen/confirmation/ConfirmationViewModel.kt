@@ -6,33 +6,26 @@ import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
-import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.gabriel.pocketstatement.data.repository.ImageRepository
 import com.gabriel.pocketstatement.domain.model.Receipt
 import com.gabriel.pocketstatement.domain.usecase.ReceiptUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.time.LocalDate
 import javax.inject.Inject
-
-import kotlinx.coroutines.flow.asSharedFlow
 
 
 @HiltViewModel
 class ConfirmationViewModel @Inject constructor(
     private val useCases: ReceiptUseCases,
-    @ApplicationContext private val context: Context // Injetamos o contexto para converter Uri -> Bitmap
+    @ApplicationContext private val context: Context
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ConfirmationState())
@@ -55,13 +48,16 @@ class ConfirmationViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            _state.value = _state.value.copy(isLoading = true, extractedText = null, error = null, processedReceipt = null)
+            _state.value = _state.value.copy(
+                isLoading = true,
+                extractedText = null,
+                error = null,
+                processedReceipt = null
+            )
             try {
-                // Etapa 1: OCR
                 val rawText = useCases.textRecognitionUseCase(bitmap)
                 _state.value = _state.value.copy(extractedText = rawText)
 
-                // Etapa 2: Gemini
                 useCases.processReceiptTextUseCase(rawText)
                     .onSuccess { receipt ->
                         val finalReceipt = if (receipt.transactionDate == null) {
@@ -69,13 +65,18 @@ class ConfirmationViewModel @Inject constructor(
                         } else {
                             receipt
                         }
-                        _state.value = _state.value.copy(isLoading = false, processedReceipt = finalReceipt)
+                        _state.value =
+                            _state.value.copy(isLoading = false, processedReceipt = finalReceipt)
                     }
                     .onFailure { error ->
-                        _state.value = _state.value.copy(isLoading = false, error = "Falha na IA: ${error.message}")
+                        _state.value = _state.value.copy(
+                            isLoading = false,
+                            error = "Falha na IA: ${error.message}"
+                        )
                     }
             } catch (e: Exception) {
-                _state.value = _state.value.copy(isLoading = false, error = "Erro na análise: ${e.message}")
+                _state.value =
+                    _state.value.copy(isLoading = false, error = "Erro na análise: ${e.message}")
             }
         }
     }
@@ -92,7 +93,6 @@ class ConfirmationViewModel @Inject constructor(
         }
     }
 
-    // Função auxiliar para converter Uri para Bitmap, encapsulada dentro da classe.
     private fun Uri.toBitmap(context: Context): Bitmap? {
         return try {
             if (Build.VERSION.SDK_INT < 28) {

@@ -25,9 +25,6 @@ fun EmptyStateComponent(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            // It's good practice to use string resources instead of hardcoded strings.
-            // Add <string name="no_receipts_found">Nenhum recibo encontrado.\nClique no botão + para adicionar um.</string>
-            // to your res/values/strings.xml
             text = stringResource(id = R.string.no_receipts_found),
             style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Center,

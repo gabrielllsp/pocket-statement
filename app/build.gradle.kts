@@ -19,25 +19,21 @@ android {
     defaultConfig {
         applicationId = "com.gabriel.pocketstatement"
         minSdk = 24
-        targetSdk = 34 // Manter 34 estável
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        // --- INÍCIO DA CORREÇÃO ---
-        // Carrega o arquivo local.properties de forma explícita
         val localProperties = Properties()
         val localPropertiesFile = rootProject.file("local.properties")
         if (localPropertiesFile.exists()) {
             localProperties.load(localPropertiesFile.inputStream())
         }
 
-        // Obtém a chave do objeto Properties e fornece um valor padrão se não for encontrada
-        val apiKey = localProperties.getProperty("GEMINI_API_KEY", "")
 
-        // Cria o campo no BuildConfig
+        val apiKey = localProperties.getProperty("GEMINI_API_KEY", "")
         buildConfigField("String", "GEMINI_API_KEY", "\"$apiKey\"")
-        // --- FIM DA CORREÇÃO ---
+
     }
 
     buildTypes {
@@ -67,22 +63,17 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
 
-    // --- SEÇÃO COMPOSE CORRIGIDA ---
-    val composeBom = "2024.05.00"
-    // ESTA É A LINHA QUE FALTAVA. Ela define a versão para todas as 'implementation' do Compose abaixo.
-    implementation(platform("androidx.compose:compose-bom:$composeBom"))
 
-    // Agora estas linhas sabem que devem usar as versões do BOM 2024.05.00
+    val composeBom = "2024.05.00"
+    implementation(platform("androidx.compose:compose-bom:$composeBom"))
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
-
-    // Testes também usam o BOM
     androidTestImplementation(platform("androidx.compose:compose-bom:$composeBom"))
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
-    // --- FIM DA SEÇÃO COMPOSE CORRIGIDA ---
+
 
     // Lifecycle & ViewModel for state management
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
@@ -90,14 +81,14 @@ dependencies {
     // Navigation for moving between screens
     implementation("androidx.navigation:navigation-compose:2.7.7")
 
-    // Room for local database (CORRIGINDO A INCONSISTÊNCIA)
+    // Room for local database
     val roomVersion = "2.6.1"
     implementation("androidx.room:room-runtime:$roomVersion")
     implementation("androidx.room:room-ktx:$roomVersion")
-    ksp("androidx.room:room-compiler:$roomVersion") // A versão do ksp DEVE ser a mesma
+    ksp("androidx.room:room-compiler:$roomVersion")
 
     // Icons
-    implementation("androidx.compose.material:material-icons-extended") // Deixe o BOM do Material 2 controlar a versão
+    implementation("androidx.compose.material:material-icons-extended")
 
     // CameraX
     val cameraXVersion = "1.3.4"
@@ -126,6 +117,5 @@ dependencies {
 
     // Accompanist for Jetpack Compose Permissions
     implementation("com.google.accompanist:accompanist-permissions:0.34.0")
-
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
 }

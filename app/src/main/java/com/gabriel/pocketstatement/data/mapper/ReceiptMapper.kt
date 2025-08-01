@@ -39,7 +39,7 @@ fun ReceiptDto.toDomain(): Receipt {
     return Receipt(
         storeName = this.storeName,
         totalAmount = this.totalAmount,
-        transactionDate = this.transactionDate?.let { LocalDate.parse(it) }, // Converte para LocalDate
+        transactionDate = this.transactionDate?.let { LocalDate.parse(it) },
         items = this.items,
         category = this.category
     )

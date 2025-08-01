@@ -11,7 +11,7 @@ data class ReceiptEntity(
     val id: Long = 0,
     val storeName: String,
     val totalAmount: Double,
-    val transactionDate: LocalDate?, // Tornando a data da transação opcional
+    val transactionDate: LocalDate?,
     val creationDate: LocalDate,
     val items: List<ReceiptItem>,
     val category: String,

@@ -7,9 +7,7 @@ class SaveReceiptUseCase(
     private val repository: ReceiptRepository
 ) {
     suspend operator fun invoke(receipt: Receipt) {
-        // Future logic can be added here (e.g., validation)
         if (receipt.storeName.isBlank()) {
-            // throw IllegalArgumentException("Store name cannot be empty.")
         }
         repository.saveReceipt(receipt)
     }

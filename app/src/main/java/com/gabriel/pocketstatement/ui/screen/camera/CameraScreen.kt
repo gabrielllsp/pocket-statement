@@ -2,16 +2,20 @@ package com.gabriel.pocketstatement.ui.screen.camera
 
 import android.Manifest
 import android.content.Context
-import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
-import androidx.camera.core.ImageProxy
 import androidx.camera.view.LifecycleCameraController
 import androidx.camera.view.PreviewView
-import androidx.compose.ui.viewinterop.AndroidView
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material3.Button
@@ -29,8 +33,8 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.gabriel.pocketstatement.R
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionStatus
@@ -42,12 +46,11 @@ import java.util.Date
 import java.util.Locale
 
 
-
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun CameraScreen(
-    onNavigateBack: () -> Unit, // Adicionamos onNavigateBack
-    onPhotoCaptured: (Uri) -> Unit // Mantemos onPhotoCaptured com Uri
+    onNavigateBack: () -> Unit,
+    onPhotoCaptured: (Uri) -> Unit
 ) {
     val cameraPermissionState = rememberPermissionState(permission = Manifest.permission.CAMERA)
 
@@ -59,6 +62,7 @@ fun CameraScreen(
                     onPhotoCaptured = onPhotoCaptured
                 )
             }
+
             is PermissionStatus.Denied -> {
                 PermissionDeniedContent(
                     shouldShowRationale = cameraPermissionState.status.shouldShowRationale,
@@ -86,7 +90,6 @@ fun CameraView(
             },
             modifier = Modifier.fillMaxSize()
         )
-        // Garante que o controlador está ligado ao ciclo de vida
         LaunchedEffect(Unit) {
             cameraController.bindToLifecycle(lifecycleOwner)
         }
@@ -106,19 +109,29 @@ fun CameraView(
                         }
 
                         override fun onError(exception: ImageCaptureException) {
-                            Log.e("CameraView", "Error capturing image: ${exception.message}", exception)
+                            Log.e(
+                                "CameraView",
+                                "Error capturing image: ${exception.message}",
+                                exception
+                            )
                         }
                     }
                 )
             },
-            modifier = Modifier.align(Alignment.BottomCenter).padding(16.dp)
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(16.dp)
         ) {
-            Icon(imageVector = Icons.Default.PhotoCamera, contentDescription = "Take picture", modifier = Modifier.size(48.dp))
+            Icon(
+                imageVector = Icons.Default.PhotoCamera,
+                contentDescription = "Take picture",
+                modifier = Modifier.size(48.dp)
+            )
         }
     }
 }
 
-// Função auxiliar para criar um arquivo temporário para a imagem
+
 private fun createTempImageFile(context: Context): File {
     val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
     val storageDir: File? = context.externalCacheDir

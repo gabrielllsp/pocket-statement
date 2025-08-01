@@ -12,18 +12,16 @@ import kotlin.coroutines.suspendCoroutine
 class TextRecognitionUseCase @Inject constructor() {
 
     suspend operator fun invoke(bitmap: Bitmap): String {
-        // Wrap the callback API into a suspend function
+
         return suspendCoroutine { continuation ->
             val image = InputImage.fromBitmap(bitmap, 0)
             val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
 
             recognizer.process(image)
                 .addOnSuccessListener { visionText ->
-                    // On success, resume the coroutine with the result text
                     continuation.resume(visionText.text)
                 }
                 .addOnFailureListener { e ->
-                    // On failure, resume the coroutine with an exception
                     continuation.resumeWithException(e)
                 }
         }

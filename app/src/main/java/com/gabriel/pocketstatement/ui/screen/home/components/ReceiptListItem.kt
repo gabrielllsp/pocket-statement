@@ -2,7 +2,13 @@ package com.gabriel.pocketstatement.ui.screen.home.components
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -64,20 +70,15 @@ fun ReceiptListItem(
                     color = MaterialTheme.colorScheme.primary
                 )
 
-                // --- INÍCIO DA CORREÇÃO ---
-                // Verifica se transactionDate não é nula antes de tentar formatá-la.
-                // Se for nula, usa a creationDate como fallback.
                 val dateToDisplay = receipt.transactionDate ?: receipt.creationDate
                 Text(
                     text = dateToDisplay.format(DateTimeFormatter.ofPattern("dd/MM/yy")),
                     style = MaterialTheme.typography.bodySmall
                 )
-                // --- FIM DA CORREÇÃO ---
             }
         }
     }
 }
-
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Preview(showBackground = true)

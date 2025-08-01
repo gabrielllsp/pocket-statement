@@ -24,6 +24,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxState
 import androidx.compose.material3.SwipeToDismissBoxValue
@@ -32,7 +36,9 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
@@ -44,6 +50,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gabriel.pocketstatement.R
 import com.gabriel.pocketstatement.ui.screen.home.components.EmptyStateComponent
 import com.gabriel.pocketstatement.ui.screen.home.components.ReceiptListItem
+import kotlinx.coroutines.flow.collectLatest
 
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -57,14 +64,33 @@ fun HomeScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(key1 = true) {
+        viewModel.eventFlow.collectLatest { event ->
+            when (event) {
+                is HomeViewModel.UiEvent.ShowUndoSnackbar -> {
+                    val result = snackbarHostState.showSnackbar(
+                        message = "Recibo deletado",
+                        actionLabel = "Desfazer",
+                        duration = SnackbarDuration.Short
+                    )
+                    if (result == SnackbarResult.ActionPerformed) {
+                        viewModel.onUndoDelete(event.receipt)
+                    }
+                }
+            }
+        }
+    }
+
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { Text(text = stringResource(id = R.string.app_name)) },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer
                 ),
-                // Bloco de ações para ícones na barra superior
                 actions = {
                     IconButton(onClick = onNavigateToDashboard) {
                         Icon(
@@ -84,7 +110,11 @@ fun HomeScreen(
             }
         }
     ) { paddingValues ->
-        Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
             if (state.receipts.isEmpty() && !state.isLoading) {
                 EmptyStateComponent(modifier = Modifier.fillMaxSize())
             } else {
@@ -107,14 +137,11 @@ fun HomeScreen(
                                 }
                             }
                         )
-
                         SwipeToDismissBox(
                             state = dismissState,
                             enableDismissFromStartToEnd = false,
                             enableDismissFromEndToStart = true,
-                            backgroundContent = {
-                                SwipeBackground(dismissState = dismissState)
-                            },
+                            backgroundContent = { SwipeBackground(dismissState) },
                             content = {
                                 ReceiptListItem(
                                     receipt = receipt,
@@ -125,7 +152,6 @@ fun HomeScreen(
                     }
                 }
             }
-
             if (state.isLoading && state.receipts.isEmpty()) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
             }

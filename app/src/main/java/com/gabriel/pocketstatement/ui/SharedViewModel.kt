@@ -1,6 +1,5 @@
 package com.gabriel.pocketstatement.ui
 
-import android.graphics.Bitmap
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -10,14 +9,14 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SharedViewModel @Inject constructor() : ViewModel() {
-    private val _capturedImageUri = MutableStateFlow<Uri?>(null) // Mude o nome e o tipo
+    private val _capturedImageUri = MutableStateFlow<Uri?>(null)
     val capturedImageUri = _capturedImageUri.asStateFlow()
 
-    fun setUri(uri: Uri) { // Mude o nome e o tipo
+    fun setUri(uri: Uri) {
         _capturedImageUri.value = uri
     }
 
-    fun clearUri() { // Mude o nome
+    fun clearUri() {
         _capturedImageUri.value = null
     }
 }
